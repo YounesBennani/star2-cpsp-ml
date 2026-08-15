@@ -1,0 +1,10 @@
+numpy>=1.23
+pandas>=1.5
+scikit-learn>=1.2
+xgboost>=1.7
+shap>=0.42
+scipy>=1.10
+matplotlib>=3.6
+joblib>=1.2
+openpyxl>=3.1
+Pillow>=9.4

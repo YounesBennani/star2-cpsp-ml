@@ -1,0 +1,42 @@
+# Data
+*.csv
+*.xlsx
+*.pdf
+STAR_T1_T3_T4_measures_QST_numeric.csv
+T2_deid_diary_data_numeric.csv
+
+# Model artifacts
+*.joblib
+*.pkl
+
+# Pipeline outputs
+Results/
+Results_diary_only/
+Analysis/
+Best_model_RF/
+Best_model_RF_diary_only/
+figures/output/
+*.png
+*.svg
+*.jpg
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# System
+.DS_Store
+Thumbs.db
+*.swp
+
+# IDE
+.vscode/
+.idea/
