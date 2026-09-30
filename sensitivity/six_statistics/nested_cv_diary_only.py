@@ -48,7 +48,7 @@ COST_FP      = 1.0
 COST_FN      = 1.0
 GRID_TAU_POS = np.linspace(0.55, 0.95, 41)
 GRID_TAU_NEG = np.linspace(0.05, 0.45, 41)
-OUTPUT_DIR   = "Results"
+OUTPUT_DIR   = "Results_diary_only"
 FIGURES_DIR  = os.path.join(OUTPUT_DIR, "figures")
 N_INTERP     = 100
 SCALE_POS_WEIGHT = round(97 / 47, 4)   # 2.0638 — neg/pos ratio
@@ -82,18 +82,17 @@ def make_t2_aggregates(df_t2, day):
         if base in {'bpi_pain_mean', 'bpi_pain_intf', 'bpi_pain_night'}: continue
         days_arr = np.array([d for d, _ in d_cols], dtype=float)
         vals = df_t2[[c for _, c in d_cols]].to_numpy(dtype=float)
+        out[f"{base}__last"]  = vals[:, -1]
         out[f"{base}__mean"]  = np.nanmean(vals, axis=1)
         out[f"{base}__std"]   = np.nanstd(vals,  axis=1)
+        out[f"{base}__min"]   = np.nanmin(vals,  axis=1)
+        out[f"{base}__max"]   = np.nanmax(vals,  axis=1)
+        out[f"{base}__slope"] = np.apply_along_axis(lambda r: _safe_slope(days_arr, r), 1, vals)
     return out
 
 def select_t1_cols(df_t123):
-    WHITELIST = {
-        'site', 'survey_lang', 'gendert1', 'child_aget1',
-        'rcads_anxiety_total_tt1', 'rcads_mdd_tt1',
-        'ql_st1', 'pef_st1', 'prghtt1', 'prpqtt1',
-        'pcq_efat1', 'pcq_pfat1', 'pdc4t1', 'pcq_appt1',
-    }
-    return [c for c in df_t123.columns if c in WHITELIST]
+    """Diary-only: no T1 baseline features."""
+    return []
 
 def build_X(df_t123, t2_agg_cache, ids, t1_cols, day, ref_cols=None):
     ids_str = [str(i) for i in ids]; ids_set = set(ids_str)
@@ -314,7 +313,7 @@ if __name__ == "__main__":
     summary = early_all.groupby("Model")[metric_cols].agg(["mean","std"]).reset_index()
     summary.columns = ["Model"] + [f"{c[0]} {c[1]}" for c in summary.columns if c[0]!="Model"]
 
-    print("\n"+"="*60+"\nSUMMARY — ALL BALANCED, Baseline+Diary\n"+"="*60)
+    print("\n"+"="*60+"\nSUMMARY — ALL BALANCED, Diary Only\n"+"="*60)
     print(summary[["Model","Test AUROC mean","Test AUROC std","Balanced Accuracy mean",
                    "Mean_decision_day mean","Pct_fallback_day30 mean"]].to_string(index=False))
 
@@ -347,7 +346,7 @@ if __name__ == "__main__":
         ax.plot(pivot.index, pivot.values, "o-", color=c, lw=2, label=mn)
     ax.axvline(x=MAX_DAY, color="gray", ls=":", lw=1)
     ax.set_xlabel("Day post-surgery"); ax.set_ylabel("% patients decided (cumulative)")
-    ax.set_title("Early-Decision Rate — All Balanced, Baseline+Diary", fontweight="bold")
+    ax.set_title("Early-Decision Rate — All Balanced, Diary Only", fontweight="bold")
     ax.legend(fontsize=9); fig.tight_layout()
     fig.savefig(os.path.join(FIGURES_DIR,"decision_day_distribution.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -370,7 +369,7 @@ if __name__ == "__main__":
                             np.percentile(tprs,97.5,axis=0), color=c, alpha=0.1)
     ax_roc.plot([0,1],[0,1],"k--",lw=1)
     ax_roc.set_xlabel("False Positive Rate"); ax_roc.set_ylabel("True Positive Rate")
-    ax_roc.set_title("ROC — All Balanced, Baseline+Diary", fontweight="bold")
+    ax_roc.set_title("ROC — All Balanced, Diary Only", fontweight="bold")
     ax_roc.legend(loc="lower right", fontsize=9); ax_roc.set_aspect("equal")
     fig_roc.tight_layout()
     fig_roc.savefig(os.path.join(FIGURES_DIR,"ROC_combined.png"), dpi=300, bbox_inches="tight")
@@ -393,7 +392,7 @@ if __name__ == "__main__":
                            np.percentile(precs,97.5,axis=0), color=c, alpha=0.1)
     ax_pr.axhline(prevalence, color="k", ls="--", lw=1, label=f"Prevalence={prevalence:.2f}")
     ax_pr.set_xlabel("Recall"); ax_pr.set_ylabel("Precision")
-    ax_pr.set_title("PR — All Balanced, Baseline+Diary", fontweight="bold")
+    ax_pr.set_title("PR — All Balanced, Diary Only", fontweight="bold")
     ax_pr.legend(loc="upper right", fontsize=9); fig_pr.tight_layout()
     fig_pr.savefig(os.path.join(FIGURES_DIR,"PR_combined.png"), dpi=300, bbox_inches="tight")
     plt.close(fig_pr)
@@ -420,7 +419,7 @@ if __name__ == "__main__":
                                 np.nanpercentile(fracs,97.5,axis=0), color=c, alpha=0.1)
     ax_cal.plot([0,1],[0,1],"k--",lw=1,label="Perfect")
     ax_cal.set_xlabel("Mean Predicted Probability"); ax_cal.set_ylabel("Observed Frequency")
-    ax_cal.set_title("Calibration — All Balanced, Baseline+Diary", fontweight="bold")
+    ax_cal.set_title("Calibration — All Balanced, Diary Only", fontweight="bold")
     ax_cal.legend(loc="lower right", fontsize=9); ax_cal.set_aspect("equal")
     fig_cal.tight_layout()
     fig_cal.savefig(os.path.join(FIGURES_DIR,"Calibration_combined.png"), dpi=300, bbox_inches="tight")

@@ -62,11 +62,11 @@ for ax, model in zip(axes, models):
 
     # Wilcoxon signed-rank (non-parametric paired test)
     stat_w, p_w = stats.wilcoxon(merged["AUROC_BD"], merged["AUROC_DO"],
-                                  alternative="two-sided")
+                                  alternative="greater")
 
     # Paired t-test
     stat_t, p_t = stats.ttest_rel(merged["AUROC_BD"], merged["AUROC_DO"],
-                                   alternative="two-sided")
+                                   alternative="greater")
 
     pstr_w = ("p < 0.001" if p_w < 0.001 else
               "p < 0.01"  if p_w < 0.01  else

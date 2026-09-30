@@ -6,7 +6,7 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
-OUT = "Data/Star 2/Figure_pipeline_schematic.png"
+OUT = "Figure_pipeline_schematic.png"
 
 # ── Palette ────────────────────────────────────────────────────────────────
 C_DATA   = "#E8EEF7"
@@ -57,7 +57,7 @@ panel_label(0.05, 15.30, "(a)")
 box(0.55, 13.85, 9.05, 1.50,
     "Analytic cohort",
     "N = 144 adolescents  ·  47 CPSP+ (32.6%) / 97 CPSP−\n"
-    "14 preoperative features + 150 diary aggregates  =  164 candidate features per patient per day d",
+    "14 preoperative features + 50 diary aggregates  =  64 candidate features per patient per day d",
     fc=C_DATA, title_size=11)
 
 box(0.55, 12.55, 9.05, 0.90,

@@ -82,12 +82,8 @@ def make_t2_aggregates(df_t2, day):
         if base in {'bpi_pain_mean', 'bpi_pain_intf', 'bpi_pain_night'}: continue
         days_arr = np.array([d for d, _ in d_cols], dtype=float)
         vals = df_t2[[c for _, c in d_cols]].to_numpy(dtype=float)
-        out[f"{base}__last"]  = vals[:, -1]
         out[f"{base}__mean"]  = np.nanmean(vals, axis=1)
         out[f"{base}__std"]   = np.nanstd(vals,  axis=1)
-        out[f"{base}__min"]   = np.nanmin(vals,  axis=1)
-        out[f"{base}__max"]   = np.nanmax(vals,  axis=1)
-        out[f"{base}__slope"] = np.apply_along_axis(lambda r: _safe_slope(days_arr, r), 1, vals)
     return out
 
 def select_t1_cols(df_t123):

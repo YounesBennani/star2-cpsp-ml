@@ -1,4 +1,4 @@
-"""RF full-dataset fit + SHAP — All Balanced, Baseline+Diary. Output → Best_model_RF/"""
+"""RF full-dataset fit + SHAP — All Balanced, Diary Only. Output → Best_model_RF/"""
 import os, re
 import numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
@@ -15,7 +15,7 @@ from sklearn.feature_selection import RFE
 T123_PATH = "../STAR_T1_T3_T4_measures_QST_numeric.csv"
 T2_PATH   = "../T2_deid_diary_data_numeric.csv"
 ID_COL = "studyid"; LABEL_COL = "cpsp_t4_bin"; MAX_DAY = 30; RANDOM_STATE = 42
-BEST_MODEL_DIR = "Best_model_RF"
+BEST_MODEL_DIR = "Best_model_RF_diary_only"
 os.makedirs(BEST_MODEL_DIR, exist_ok=True)
 
 param_grid_rf = {
@@ -48,18 +48,13 @@ def make_t2_aggregates(df_t2, day):
         if base in {'bpi_pain_mean', 'bpi_pain_intf', 'bpi_pain_night'}: continue
         da=np.array([d for d,_ in d_cols],dtype=float)
         vals=df_t2[[c for _,c in d_cols]].to_numpy(dtype=float)
-        out[f"{base}__mean"]=np.nanmean(vals,axis=1)
-        out[f"{base}__std"]=np.nanstd(vals,axis=1)
+        out[f"{base}__last"]=vals[:,-1]; out[f"{base}__mean"]=np.nanmean(vals,axis=1)
+        out[f"{base}__std"]=np.nanstd(vals,axis=1); out[f"{base}__min"]=np.nanmin(vals,axis=1)
+        out[f"{base}__max"]=np.nanmax(vals,axis=1)
+        out[f"{base}__slope"]=np.apply_along_axis(lambda r:_safe_slope(da,r),1,vals)
     return out
 
-def select_t1_cols(df_t123):
-    WHITELIST = {
-        'site', 'survey_lang', 'gendert1', 'child_aget1',
-        'rcads_anxiety_total_tt1', 'rcads_mdd_tt1',
-        'ql_st1', 'pef_st1', 'prghtt1', 'prpqtt1',
-        'pcq_efat1', 'pcq_pfat1', 'pdc4t1', 'pcq_appt1',
-    }
-    return [c for c in df_t123.columns if c in WHITELIST]
+def select_t1_cols(df_t123): return []  # diary-only
 
 if __name__=="__main__":
     print("Loading data...")
@@ -102,7 +97,7 @@ if __name__=="__main__":
         plt.figure(figsize=(10,8))
         if plot_type=="beeswarm": shap.summary_plot(shap_pos,X_rfe_df,show=False)
         else: shap.summary_plot(shap_pos,X_rfe_df,plot_type="bar",show=False)
-        plt.title(f"SHAP {plot_type.capitalize()} — RF All Balanced, Baseline+Diary",fontsize=13,fontweight="bold")
+        plt.title(f"SHAP {plot_type.capitalize()} — RF All Balanced, Diary Only",fontsize=13,fontweight="bold")
         plt.tight_layout(); plt.savefig(os.path.join(BEST_MODEL_DIR,f"{fname}.png"),dpi=300,bbox_inches="tight"); plt.close()
     mean_abs=np.abs(shap_pos).mean(axis=0); feat_sum=pd.DataFrame({
         "Feature":sel_feat,"Mean_|SHAP|":mean_abs,"Std_|SHAP|":np.abs(shap_pos).std(axis=0),
